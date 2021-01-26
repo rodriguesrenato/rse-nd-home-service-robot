@@ -1,0 +1,4 @@
+string action
+move_base_msgs/MoveBaseGoal goal
+---
+string msg_feedback
