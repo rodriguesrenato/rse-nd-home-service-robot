@@ -9,7 +9,14 @@ Clone this repository in **src** folder in your catkin workspace and following r
 ```
 cd ~/catkin_ws/src
 git clone https://github.com/rodriguesrenato/rse-nd-home-service-robot.git
-cd rse-nd-home-service-robot
+```
+and the following official packages:
+```
+git clone https://github.com/ros-perception/slam_gmapping.git
+git clone https://github.com/turtlebot/turtlebot.git
+git clone https://github.com/turtlebot/turtlebot_interactions.git
+git clone https://github.com/turtlebot/turtlebot_simulator.git
+git clone https://github.com/ros-teleop/teleop_twist_keyboard
 ```
 
 ## Usage
