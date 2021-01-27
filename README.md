@@ -1,22 +1,14 @@
 # rse-nd-home-service-robot
 Course project "Home Service Robot" repository for the Udacity Robotics Software Engineer Nanodegree program.
 
-This project contains the following Catkin packages :
+This project consist to build a service robot that navigates through of the world `restaurant_renato`, picking up or droping off a marker on the respective goal locations. It constains scripts to build the map using gmapping SLAM, to localize itself with AMCL, navigate to predeterminated goal locations and interact with markers in Rviz.
 
-   
 ## Installation
 Clone this repository in **src** folder in your catkin workspace and following repositories bellow:
 ```
 cd ~/catkin_ws/src
 git clone https://github.com/rodriguesrenato/rse-nd-home-service-robot.git
-git clone https://github.com/rodriguesrenato/rse-nd-renato-robot.git [TODO]
-```
-and the following official packages:
-```
 git clone https://github.com/ros-perception/slam_gmapping.git
-git clone https://github.com/turtlebot/turtlebot.git
-git clone https://github.com/turtlebot/turtlebot_interactions.git
-git clone https://github.com/turtlebot/turtlebot_simulator.git
 git clone https://github.com/ros-teleop/teleop_twist_keyboard
 ```
 
@@ -35,6 +27,9 @@ SLAM and save your map
 Test your SLAM map and navigate through it
 1. Go to `rse-nd-home-service-robot/scripts` and run `./test_amcl.sh`.
 2. In Rviz, select a point in the map with `2D NAV Goal` cursor to make the robot navigate to it.
+
+Run the full Home Service Robot
+1. Go to `rse-nd-home-service-robot/scripts` and run `./add_markers.sh`.
 
 ## License
 The contents of this repository are covered under the MIT License.
