@@ -1,4 +1,0 @@
-string action
-geometry_msgs/Pose pose
----
-string msg_feedback

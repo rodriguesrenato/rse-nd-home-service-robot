@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   std_msgs
   message_generation
+  add_markers
 )
 
 ## System dependencies are found with CMake's conventions
@@ -57,10 +58,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 # Generate services in the 'srv' folder
- add_service_files(
-   FILES
-   jobRequest.srv
- )
+# add_service_files(
+#   FILES
+#   jobRequest.srv
+# )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -70,11 +71,11 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  geometry_msgs
-  std_msgs
-)
+#generate_messages(
+#  DEPENDENCIES
+#  geometry_msgs
+#  std_msgs
+#)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -196,7 +197,7 @@ catkin_package(
 # )
 
 #############
-## Testing ##
+## Testing ##c
 #############
 
 ## Add gtest based cpp test target and link libraries
@@ -212,4 +213,4 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_executable(pick_objects src/pick_objects.cpp)
 target_link_libraries(pick_objects ${catkin_LIBRARIES})
-add_dependencies(pick_objects pick_objects_generate_messages_cpp)
+add_dependencies(add_markers ${add_markers_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

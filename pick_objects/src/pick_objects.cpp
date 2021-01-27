@@ -46,7 +46,7 @@ geometry_msgs::Pose getRobotContainerPose()
 
     // Considering marker will be a box with side of 0.2 and position z is near and above sup_chassis surface
     containerPose.position.z = odom.pose.pose.position.z + 0.2;
-    
+
     containerPose.orientation.x = odom.pose.pose.orientation.x;
     containerPose.orientation.y = odom.pose.pose.orientation.y;
     containerPose.orientation.z = odom.pose.pose.orientation.z;
@@ -72,12 +72,12 @@ void travelToGoal(MoveBaseClient *ac, const move_base_msgs::MoveBaseGoal goal, c
   // Check if the robot reached its goal
   if (ac->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
   {
-    ROS_INFO("Successfully arrived at %s zone", goalName);
+    ROS_INFO("Successfully arrived at %s zone, now starting job_request", goalName);
 
     // Request to add_marker service to handle marker at current arrived goal
     add_markers::JobRequest srv;
     srv.request.job = goalName;
-    // Set request pose with the current robot's container position 
+    // Set request pose with the current robot's container position
     srv.request.pose = getRobotContainerPose(); //or use goal.target_pose.pose to put marker on the goal position
     if (!jobRequestClient.call(srv))
       ROS_ERROR("Failed to call service job_request");
@@ -124,15 +124,14 @@ int main(int argc, char **argv)
 
   // Initialize goalPickup
   move_base_msgs::MoveBaseGoal goalPickup;
-  goalPickup = setupGoal(1.0, 1.0, 0.0, 0.0, 0.0, 1.15707);
+  goalPickup = setupGoal(9.0, -1.5, 0.0, 0.0, 0.0, 1.15707);
 
   // Initialize goalDropOff
   move_base_msgs::MoveBaseGoal goalDropOff;
-  goalDropOff = setupGoal(-0.5, -0.4, 0.0, 0.0, 0.0, -1.15707);
+  goalDropOff = setupGoal(-0.5, -0.3, 0.0, 0.0, 0.0, -1.15707);
 
   // Start robot duties
   // Go to the goalPickup
-  return 0;
   travelToGoal(&ac, goalPickup, "Pickup");
 
   // wait 2 seconds
