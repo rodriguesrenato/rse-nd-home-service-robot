@@ -8,17 +8,21 @@
 
 // Define a client for to send goal requests to the move_base server through a SimpleActionClient
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
+
+// Distance on x axis from base_chassis to sup_chassis
 float xRobotContainerOffset = 0.25;
 
 // Service for request to add markers
 ros::ServiceClient jobRequestClient;
 
-
+// Get current robot's position from odom topic and calculate rear container center pose where it will hold th marker
 geometry_msgs::Pose getRobotContainerPose()
 {
   geometry_msgs::Pose containerPose;
   boost::shared_ptr<nav_msgs::Odometry const> sharedOdom;
   nav_msgs::Odometry odom;
+
+  // Get one message from odom topic
   sharedOdom = ros::topic::waitForMessage<nav_msgs::Odometry>("/odom", ros::Duration(5));
   if (sharedOdom != NULL)
   {
@@ -31,24 +35,30 @@ geometry_msgs::Pose getRobotContainerPose()
         odom.pose.pose.orientation.z,
         odom.pose.pose.orientation.w);
     tf::Matrix3x3 m(q);
+
+    // Convert quartenion to RPY
     double roll, pitch, yaw;
     m.getRPY(roll, pitch, yaw);
 
-    containerPose.position.x = odom.pose.pose.position.x - xRobotContainerOffset * sin(yaw);
-    containerPose.position.y = odom.pose.pose.position.y - xRobotContainerOffset * cos(yaw);
-    containerPose.position.z = odom.pose.pose.position.z;
+    // Translate odom pose to container pose by the yaw angle and distance between robot_chassis and sup_chassis
+    containerPose.position.x = odom.pose.pose.position.x - xRobotContainerOffset * cos(yaw);
+    containerPose.position.y = odom.pose.pose.position.y - xRobotContainerOffset * sin(yaw);
+
+    // Considering marker will be a box with side of 0.2 and position z is near and above sup_chassis surface
+    containerPose.position.z = odom.pose.pose.position.z + 0.2;
+    
     containerPose.orientation.x = odom.pose.pose.orientation.x;
     containerPose.orientation.y = odom.pose.pose.orientation.y;
     containerPose.orientation.z = odom.pose.pose.orientation.z;
     containerPose.orientation.w = odom.pose.pose.orientation.w;
 
-    ROS_INFO("roll:%1.2f, pitch:%1.2f, yaw:%1.2f", roll, pitch, yaw);
-    ROS_INFO("x:%1.2f, y:%1.2f, z:%1.2f", containerPose.position.x, containerPose.position.y, containerPose.position.z);
+    // Debug
+    // ROS_INFO("containerPose >>  x:%1.2f, y:%1.2f, z:%1.2f, roll:%1.2f, pitch:%1.2f, yaw:%1.2f", containerPose.position.x, containerPose.position.y, containerPose.position.z, roll, pitch, yaw);
   }
   return containerPose;
 }
 
-
+// Move robot to goal and request for add_marker handler the job
 void travelToGoal(MoveBaseClient *ac, const move_base_msgs::MoveBaseGoal goal, const char *goalName)
 {
   ROS_INFO("Robot is moving to %s at x:%1.2f,y:%1.2f,yaw:%1.2f ", goalName, goal.target_pose.pose.position.x, goal.target_pose.pose.position.y, goal.target_pose.pose.orientation.w);
@@ -64,10 +74,11 @@ void travelToGoal(MoveBaseClient *ac, const move_base_msgs::MoveBaseGoal goal, c
   {
     ROS_INFO("Successfully arrived at %s zone", goalName);
 
-    // Request to add_marker to handle the marker
+    // Request to add_marker service to handle marker at current arrived goal
     add_markers::JobRequest srv;
     srv.request.job = goalName;
-    srv.request.pose = getRobotContainerPose();//goal.target_pose.pose;
+    // Set request pose with the current robot's container position 
+    srv.request.pose = getRobotContainerPose(); //or use goal.target_pose.pose to put marker on the goal position
     if (!jobRequestClient.call(srv))
       ROS_ERROR("Failed to call service job_request");
   }
@@ -75,7 +86,7 @@ void travelToGoal(MoveBaseClient *ac, const move_base_msgs::MoveBaseGoal goal, c
     ROS_INFO("Failed to arrive at %s zone", goalName);
 }
 
-
+// Build goal variable based on roll, pitch and yaw
 move_base_msgs::MoveBaseGoal setupGoal(float x, float y, float z, float roll, float pitch, float yaw)
 {
   move_base_msgs::MoveBaseGoal goal;
@@ -99,7 +110,6 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "pick_objects");
   ros::NodeHandle n;
 
-  getRobotContainerPose();
   // Connect to the JobRequest service
   jobRequestClient = n.serviceClient<add_markers::JobRequest>("job_request");
 
@@ -112,66 +122,17 @@ int main(int argc, char **argv)
     ROS_INFO("Waiting for the move_base action server to start");
   }
 
-  // Define goalPickup
+  // Initialize goalPickup
   move_base_msgs::MoveBaseGoal goalPickup;
   goalPickup = setupGoal(1.0, 1.0, 0.0, 0.0, 0.0, 1.15707);
-  // goalPickup.target_pose.header.frame_id = "map";
-  // goalPickup.target_pose.header.stamp = ros::Time::now();
-  // goalPickup.target_pose.pose.position.x = 0.0;
-  // goalPickup.target_pose.pose.position.y = -2.0;
-  // tf::Quaternion q;
-  // q.setRPY(0.0, 0.0, -1.5707);
-  // q.normalize();
-  // goalPickup.target_pose.pose.orientation.x = q[0];
-  // goalPickup.target_pose.pose.orientation.y = q[1];
-  // goalPickup.target_pose.pose.orientation.z = q[2];
-  // goalPickup.target_pose.pose.orientation.w = q[3];
 
-  // Define goalDropOff
+  // Initialize goalDropOff
   move_base_msgs::MoveBaseGoal goalDropOff;
   goalDropOff = setupGoal(-0.5, -0.4, 0.0, 0.0, 0.0, -1.15707);
 
-  // goalDropOff.target_pose.header.frame_id = "map";
-  // goalDropOff.target_pose.header.stamp = ros::Time::now();
-  // goalDropOff.target_pose.pose.position.x = 0.0;
-  // goalDropOff.target_pose.pose.position.y = 2.0;
-
-  // tf::Quaternion qDropOff;
-  // qDropOff.setRPY(0.0, 0.0, -1.5707);
-  // qDropOff.normalize();
-  // goalDropOff.target_pose.pose.orientation.x = qDropOff[0];
-  // goalDropOff.target_pose.pose.orientation.y = qDropOff[1];
-  // goalDropOff.target_pose.pose.orientation.z = qDropOff[2];
-  // goalDropOff.target_pose.pose.orientation.w = qDropOff[3];
-
-  // tf::Matrix3x3 m(q);
-
-  //   tf::Matrix3x3 m2;
-  //   m2.setRotation(q);
-
-  //   /**< rotation Matrix - > quaternion */
-  //   m.getRotation(q);
-
-  //   /**< rotation Matrix -> rpy */
-  //   double roll, pitch, yaw;
-  //   m.getRPY(roll, pitch, yaw);
-
-  //   /**< rpy -> quaternion */
-  //   tf::Quaternion q3;
-  //   q3.setRPY(roll, pitch, yaw);
-  //   q3.normalize();
-
-  // tf::Quaternion q(
-  //         msg->pose.pose.orientation.x,
-  //         msg->pose.pose.orientation.y,
-  //         msg->pose.pose.orientation.z,
-  //         msg->pose.pose.orientation.w);
-  //     tf::Matrix3x3 m(q);
-  //     double roll, pitch, yaw;
-  //     m.getRPY(roll, pitch, yaw);
-
   // Start robot duties
   // Go to the goalPickup
+  return 0;
   travelToGoal(&ac, goalPickup, "Pickup");
 
   // wait 2 seconds

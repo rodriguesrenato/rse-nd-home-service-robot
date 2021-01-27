@@ -28,17 +28,18 @@ bool handle_job_request(add_markers::JobRequest::Request &req,
         marker.action = visualization_msgs::Marker::DELETE;
     }
 
+    // Define marker pose;
     marker.pose = req.pose;
 
     // Define marker size
-    marker.scale.x = 0.3;
-    marker.scale.y = 0.3;
-    marker.scale.z = 0.3;
+    marker.scale.x = 0.2;
+    marker.scale.y = 0.2;
+    marker.scale.z = 0.2;
 
     // Define marker color
     marker.color.r = 0.0f;
     marker.color.g = 1.0f;
-    marker.color.b = 0.0f;
+    marker.color.b = 0.8f;
     marker.color.a = 1.0;
 
     // Set infinite lifetime
@@ -81,7 +82,7 @@ bool handle_job_request(add_markers::JobRequest::Request &req,
     marker_pub.publish(marker);
 
     // Return a feedback response message
-    res.msg_feedback = "Job Done!";
+    res.msg_feedback = req.job+" done!";
     ROS_INFO_STREAM(res.msg_feedback);
 
     return true;
@@ -91,9 +92,11 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "add_markers");
     ros::NodeHandle n;
-    // ros::Rate r(1);
     marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
+
+    // Start job_request service to place markers
     ros::ServiceServer service = n.advertiseService("job_request", handle_job_request);
+
     ROS_INFO("Ready to handle job requests");
     ros::spin();
 
