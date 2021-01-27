@@ -8,10 +8,11 @@ project(add_markers)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  message_generation
   roscpp
   visualization_msgs
   std_msgs
-  move_base_msgs
+  geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -70,8 +71,8 @@ add_service_files(
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
-  move_base_msgs
   std_msgs
+  geometry_msgs
 )
 
 ################################################
@@ -210,4 +211,4 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_executable(add_markers src/add_markers.cpp)
 target_link_libraries(add_markers ${catkin_LIBRARIES})
-#add_dependencies(add_markers add_markers_generate_messages_cpp)
+add_dependencies(add_markers add_markers_generate_messages_cpp)

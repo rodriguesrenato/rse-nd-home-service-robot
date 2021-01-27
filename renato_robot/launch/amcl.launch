@@ -10,12 +10,11 @@
         <param name="odom_model_type" value="diff-corrected"/>
         <param name="base_frame_id" value="robot_footprint"/>
         <param name="global_frame_id" value="map"/>
-        <!-- <remap from="scan" to="renato_robot/laser/scan"/> -->
 
-        <!-- If you choose to define initial pose here -->
         <param name="initial_pose_x" value="0"/>
         <param name="initial_pose_y" value="0"/>
         <param name="initial_pose_a" value="0"/>
+
         <param name="min_particles" value="1000"/>
         <param name="max_particles" value="7000"/>
         <param name="update_min_d" value="0.1"/>
@@ -24,8 +23,7 @@
         <param name="laser_min_range" value="0.1"/>
         <param name="laser_max_range" value="30.0"/>
         <param name="laser_max_beams" value="120"/>
-        <param name="ros amcl
-        " value="0.95"/>
+        <param name="ros amcl" value="0.95"/>
         <param name="laser_z_short" value="0.1"/>
         <param name="odom_alpha1" value="0.05"/>
         <param name="odom_alpha2" value="0.05"/>
@@ -33,6 +31,7 @@
         <param name="odom_alpha4" value="0.05"/>
     </node>
 
+    <!-- Navigation Node -->
     <arg name="odom_frame_id" default="odom"/>
     <arg name="base_frame_id" default="base_chassis"/>
     <arg name="global_frame_id" default="map"/>
@@ -47,8 +46,6 @@
         <rosparam file="$(find renato_robot)/navigation/param/move_base_params.yaml" command="load" />
         <rosparam file="$(find renato_robot)/navigation/param/global_planner_params.yaml" command="load" />
         <rosparam file="$(find renato_robot)/navigation/param/navfn_global_planner_params.yaml" command="load" />
-        <!-- external params file that could be loaded into the move_base namespace -->
-        <!-- <rosparam file="$(arg custom_param_file)" command="load" /> -->
 
         <!-- reset frame_id parameters using user input data -->
         <param name="global_costmap/global_frame" value="$(arg global_frame_id)"/>
@@ -57,11 +54,7 @@
         <param name="local_costmap/robot_base_frame" value="$(arg base_frame_id)"/>
         <param name="DWAPlannerROS/global_frame_id" value="$(arg odom_frame_id)"/>
 
-        <!-- <remap from="cmd_vel" to="navigation_velocity_smoother/raw_cmd_vel"/> -->
         <remap from="odom" to="$(arg odom_topic)"/>
         <remap from="scan" to="$(arg laser_topic)"/>
     </node>
-
-
-
 </launch>

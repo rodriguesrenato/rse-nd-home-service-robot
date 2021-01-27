@@ -24,10 +24,10 @@
     <arg name="world_name" value="$(arg world_file)"/>
   </include>
 
-  <!-- Find my robot Description-->
+  <!-- Find robot Description-->
   <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find renato_robot)/urdf/renato_robot.xacro'" />
 
-  <!-- Spawn My Robot -->
+  <!-- Spawn Robot -->
   <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -param robot_description -model renato_robot 
               -x $(arg x) -y $(arg y) -z $(arg z)
               -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>

@@ -1,6 +1,4 @@
-<!--
-  Used for visualising the turtlebot while building a map or navigating with the ros navistack.
- -->
 <launch>
+  <!-- Launch Rviz with predefined configuration for navigate -->
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find renato_robot)/../rvizConfig/navigation.rviz"/>
 </launch>

@@ -2,7 +2,7 @@
 #include <visualization_msgs/Marker.h>
 #include "add_markers/JobRequest.h"
 #include <std_msgs/String.h>
-#include <move_base_msgs/MoveBaseGoal.h>
+#include <geometry_msgs/Pose.h>
 #include <tf/tf.h>
 
 ros::Publisher marker_pub;
@@ -10,6 +10,7 @@ ros::Publisher marker_pub;
 bool handle_job_request(add_markers::JobRequest::Request &req,
                         add_markers::JobRequest::Response &res)
 {
+    // Initialize commom marker varibles
     visualization_msgs::Marker marker;
     marker.header.frame_id = "/map";
     marker.header.stamp = ros::Time::now();
@@ -18,7 +19,7 @@ bool handle_job_request(add_markers::JobRequest::Request &req,
     marker.type = visualization_msgs::Marker::CYLINDER;
 
     // Consider any other action different from 'Pickup' will be a 'Drop Off'
-    if (req.action == "Pickup")
+    if (req.job == "Pickup" || req.job == "DropOff")
     {
         marker.action = visualization_msgs::Marker::ADD;
     }
@@ -27,31 +28,20 @@ bool handle_job_request(add_markers::JobRequest::Request &req,
         marker.action = visualization_msgs::Marker::DELETE;
     }
 
-    // geometry_msgs::Pose robotPose = req.goal.target_pose.pose;
-    // tf::Quaternion q(
-    // robotPose.orientation.x,
-    // robotPose.orientation.y,
-    // robotPose.orientation.z,
-    // robotPose.orientation.w);
-    // tf::Matrix3x3 m(q);
-    // double roll, pitch, yaw;
-    // m.getRPY(roll, pitch, yaw);
+    marker.pose = req.pose;
 
-    // ROS_INFO()
-    // tf::Quaternion q = robotPose.orientation; 
-    // double yaw = tf::getYaw(q);
-
-    marker.pose = req.goal.target_pose.pose;
-
+    // Define marker size
     marker.scale.x = 0.3;
     marker.scale.y = 0.3;
     marker.scale.z = 0.3;
 
+    // Define marker color
     marker.color.r = 0.0f;
     marker.color.g = 1.0f;
     marker.color.b = 0.0f;
     marker.color.a = 1.0;
 
+    // Set infinite lifetime
     marker.lifetime = ros::Duration();
 
     // Publish the marker
@@ -64,17 +54,34 @@ bool handle_job_request(add_markers::JobRequest::Request &req,
         ROS_WARN_ONCE("Please create a subscriber to the marker");
         sleep(1);
     }
-    ros::Duration(5).sleep();
+
+    // When it is as "Pickup",
+    // 1. the robot arrivedat the right place,
+    // 2. someone/something puts the marker on the robot -> marker appears
+    // 3. wait 5 seconds to this process finishes
+    // 4. the robot is ready to deliver the marker -> marker not visible anymore
+
+    // When it is as "DropOff",
+    // 1. the robot arrivedat the right place,
+    // 2. the robot retrive the marker to someone/something gets it -> marker appears
+    // 3. wait 5 seconds to this process finishes
+    // 4. someone/something got the marker on the robot -> marker not visible anymore
+
+    // Show the marker
     marker_pub.publish(marker);
+
+    // Wait 5 seconds to simulate a pickup or a drop off
     ros::Duration(5).sleep();
-    if (req.action == "Pickup")
+
+    // Then remove the marker as pickup or dropoff has finished
+    if (req.job == "Pickup" || req.job == "DropOff")
     {
         marker.action = visualization_msgs::Marker::DELETE;
     }
     marker_pub.publish(marker);
 
     // Return a feedback response message
-    res.msg_feedback = "OK";
+    res.msg_feedback = "Job Done!";
     ROS_INFO_STREAM(res.msg_feedback);
 
     return true;
