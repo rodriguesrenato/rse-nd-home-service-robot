@@ -128,7 +128,7 @@ int main(int argc, char **argv)
 
   // Initialize goalDropOff
   move_base_msgs::MoveBaseGoal goalDropOff;
-  goalDropOff = setupGoal(-0.5, -0.3, 0.0, 0.0, 0.0, -1.15707);
+  goalDropOff = setupGoal(-0.3, -0.5, 0.0, 0.0, 0.0, -1.15707);
 
   // Start robot duties
   // Go to the goalPickup
