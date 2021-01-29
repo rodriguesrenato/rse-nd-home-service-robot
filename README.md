@@ -19,17 +19,17 @@ source devel/setup.bash
 ```
 ## Usage
 
-SLAM and save your map
+- Generate the map files of your environment using SLAM:
 1. Go to `rse-nd-home-service-robot/scripts` and run `./test_slam.sh`.
-2. Navigate with teleop keyboard through your map until mapping most of the areas.
-3. Go to `rse-nd-home-service-robot/map` and save your map by running `rosrun map_server map_saver -f restaurant_renato`. 
+2. Navigate robot using teleop keyboard through your map until cover most of the areas. If results is not good enough, adjusts gmapping params in `/home/robond/catkin_ws/src/rse-nd-home-service-robot/renato_robot/launch/slam_gmapping.launch`.
+3. Go to `rse-nd-home-service-robot/map` and save your map by running in a new terminal: `rosrun map_server map_saver -f restaurant_renato`. 
 
-Test your SLAM map and navigate through it
+- Test your SLAM map and navigate through it using `2D NAV Goal`:
 1. Go to `rse-nd-home-service-robot/scripts` and run `./test_amcl.sh`.
 2. In Rviz, select a point in the map with `2D NAV Goal` cursor to make the robot navigate to it.
 
-Run the full Home Service Robot
-1. Go to `rse-nd-home-service-robot/scripts` and run `./add_markers.sh`.
+- Run the full Home Service Robot
+1. Go to `rse-nd-home-service-robot/scripts` and run `./home_service.sh`.
 
 ## License
 The contents of this repository are covered under the MIT License.
