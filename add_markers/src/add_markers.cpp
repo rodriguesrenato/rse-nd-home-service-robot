@@ -18,16 +18,6 @@ bool handle_job_request(add_markers::JobRequest::Request &req,
     marker.id = 0;
     marker.type = visualization_msgs::Marker::CYLINDER;
 
-    // Consider any other action different from 'Pickup' will be a 'Drop Off'
-    if (req.job == "Pickup" || req.job == "DropOff")
-    {
-        marker.action = visualization_msgs::Marker::ADD;
-    }
-    else
-    {
-        marker.action = visualization_msgs::Marker::DELETE;
-    }
-
     // Define marker pose;
     marker.pose = req.pose;
 
@@ -56,33 +46,34 @@ bool handle_job_request(add_markers::JobRequest::Request &req,
         sleep(1);
     }
 
-    // When it is as "Pickup",
-    // 1. the robot arrivedat the right place,
-    // 2. someone/something puts the marker on the robot -> marker appears
-    // 3. wait 5 seconds to this process finishes
-    // 4. the robot is ready to deliver the marker -> marker not visible anymore
+    // Consider any other action different from 'Pickup' will add the marker
 
-    // When it is as "DropOff",
-    // 1. the robot arrivedat the right place,
-    // 2. the robot retrive the marker to someone/something gets it -> marker appears
-    // 3. wait 5 seconds to this process finishes
-    // 4. someone/something got the marker on the robot -> marker not visible anymore
+    marker.action = visualization_msgs::Marker::ADD;
 
-    // Show the marker
-    marker_pub.publish(marker);
-
-    // Wait 5 seconds to simulate a pickup or a drop off
-    ros::Duration(5).sleep();
-
-    // Then remove the marker as pickup or dropoff has finished
-    if (req.job == "Pickup" || req.job == "DropOff")
+    if (req.job == "Pickup")
     {
+        // Just for ilustrate the pickup, make marker 50% transparent and place it on the
+        // robot rear container. 1 second delay just for show this process before delete it
+        // marker.action = visualization_msgs::Marker::ADD;
+        marker.color.a = 0.5;
+        marker_pub.publish(marker);
+        ros::Duration(1).sleep();
         marker.action = visualization_msgs::Marker::DELETE;
     }
+    else
+    {
+        // Delete the markert at position
+        if (req.job == "Remove")
+        {
+            marker.action = visualization_msgs::Marker::DELETE;
+        }
+    }
+
+    // Handle the marker
     marker_pub.publish(marker);
 
     // Return a feedback response message
-    res.msg_feedback = req.job+" done!";
+    res.msg_feedback = req.job + " job done!";
     ROS_INFO_STREAM(res.msg_feedback);
 
     return true;

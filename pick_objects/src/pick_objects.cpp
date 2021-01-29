@@ -44,8 +44,8 @@ geometry_msgs::Pose getRobotContainerPose()
     containerPose.position.x = odom.pose.pose.position.x - xRobotContainerOffset * cos(yaw);
     containerPose.position.y = odom.pose.pose.position.y - xRobotContainerOffset * sin(yaw);
 
-    // Considering marker will be a box with side of 0.2 and position z is near and above sup_chassis surface
-    containerPose.position.z = odom.pose.pose.position.z + 0.2;
+    // Considering marker will be a box with side of 0.1 and position z is near and above sup_chassis surface
+    containerPose.position.z = odom.pose.pose.position.z + 0.1;
 
     containerPose.orientation.x = odom.pose.pose.orientation.x;
     containerPose.orientation.y = odom.pose.pose.orientation.y;
@@ -80,10 +80,10 @@ void travelToGoal(MoveBaseClient *ac, const move_base_msgs::MoveBaseGoal goal, c
     // Set request pose with the current robot's container position
     srv.request.pose = getRobotContainerPose(); //or use goal.target_pose.pose to put marker on the goal position
     if (!jobRequestClient.call(srv))
-      ROS_ERROR("Failed to call service job_request");
+      ROS_ERROR("Failed to call service job_request, head to the next goal");
   }
   else
-    ROS_INFO("Failed to arrive at %s zone", goalName);
+    ROS_INFO("Failed to arrive at %s zone, head to the next goal", goalName);
 }
 
 // Build goal variable based on roll, pitch and yaw
@@ -94,6 +94,7 @@ move_base_msgs::MoveBaseGoal setupGoal(float x, float y, float z, float roll, fl
   goal.target_pose.header.stamp = ros::Time::now();
   goal.target_pose.pose.position.x = x;
   goal.target_pose.pose.position.y = y;
+  goal.target_pose.pose.position.z = z;
   tf::Quaternion q;
   q.setRPY(roll, pitch, yaw);
   q.normalize();
@@ -102,6 +103,15 @@ move_base_msgs::MoveBaseGoal setupGoal(float x, float y, float z, float roll, fl
   goal.target_pose.pose.orientation.z = q[2];
   goal.target_pose.pose.orientation.w = q[3];
   return goal;
+}
+void startupMarker(const move_base_msgs::MoveBaseGoal goal)
+{
+  add_markers::JobRequest srv;
+  srv.request.job = "Startup";
+  // Set marker on the goal pose
+  srv.request.pose = goal.target_pose.pose;
+  if (!jobRequestClient.call(srv))
+    ROS_ERROR("Failed to call service job_request");
 }
 
 int main(int argc, char **argv)
@@ -124,18 +134,21 @@ int main(int argc, char **argv)
 
   // Initialize goalPickup
   move_base_msgs::MoveBaseGoal goalPickup;
-  goalPickup = setupGoal(9.0, -1.5, 0.0, 0.0, 0.0, 1.15707);
+  goalPickup = setupGoal(9.0, -2.0, 0.0, 0.0, 0.0, 1.15707);
 
   // Initialize goalDropOff
   move_base_msgs::MoveBaseGoal goalDropOff;
   goalDropOff = setupGoal(-0.3, -0.5, 0.0, 0.0, 0.0, -1.15707);
 
   // Start robot duties
+  // Initialize marker at the Pickup position 0.2 higher in z
+  startupMarker(setupGoal(9.0, -2.0, 0.2, 0.0, 0.0, 1.15707));
+
   // Go to the goalPickup
   travelToGoal(&ac, goalPickup, "Pickup");
 
-  // wait 2 seconds
-  ros::Duration(2).sleep();
+  // wait 5 seconds
+  ros::Duration(5).sleep();
 
   // Go to the goalDropOff
   travelToGoal(&ac, goalDropOff, "DropOff");
