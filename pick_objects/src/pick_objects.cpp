@@ -15,7 +15,7 @@ float xRobotContainerOffset = 0.25;
 // Service for request to add markers
 ros::ServiceClient jobRequestClient;
 
-// Get current robot's position from odom topic and calculate rear container center pose where it will hold th marker
+// Get current robot's real position from odom topic and calculate the right place to put the marker to it be placed on the center of the sup_chassis robot link.
 geometry_msgs::Pose getRobotContainerPose()
 {
   geometry_msgs::Pose containerPose;
@@ -44,7 +44,7 @@ geometry_msgs::Pose getRobotContainerPose()
     containerPose.position.x = odom.pose.pose.position.x - xRobotContainerOffset * cos(yaw);
     containerPose.position.y = odom.pose.pose.position.y - xRobotContainerOffset * sin(yaw);
 
-    // Considering marker will be a box with side of 0.1 and position z is near and above sup_chassis surface
+    // Considering the size of the marker of 0.2 in z axis and odom position z is near and above sup_chassis surface
     containerPose.position.z = odom.pose.pose.position.z + 0.1;
 
     containerPose.orientation.x = odom.pose.pose.orientation.x;
