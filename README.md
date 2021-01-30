@@ -4,6 +4,7 @@ Course project "Home Service Robot" repository for the Udacity Robotics Software
 This project consist of building a service robot that navigates through of the world `restaurant_renato`, picking up or droping off a marker on the respective goal locations. It constains scripts to build the map using gmapping SLAM, to localize itself with AMCL, navigate to predeterminated goal locations and interact with markers in Rviz.
 
 The packages above were implemented:
+
 - `renato_robot`: The main package that contains the robot, world file, maps and launch files for SLAM and localization.
   - URDF robot `renato_robot`.
   - World file `restaurant_renato.world`.
@@ -14,8 +15,9 @@ The packages above were implemented:
     - `slam_gmapping`: Run **gmapping** with preconfigured params.
     - `amcl.launch`: Run **amcl** and **move_base** with preconfigured params.
     - `view_navigation.launch`: Run Rviz with preconfigured params.
+    
 - `pick_objects`: Contains a script `pick_objects.cpp` that navigate the robot through predefined goal positions.
-  - 
+
 - `add_markers`: Contains a script `add_markers.cpp` that start a service which handle marker on the map. The service receive a `job` and `pose` on request, the `job` variable is a string that specify the action with marker at the `pose` position.
 
 External Official package were used: `slam_gmapping` and `teleop_twist_keyboard`.
